@@ -1,0 +1,101 @@
+// Prisma schema — PostgreSQL là nguồn chân lý.
+// Điểm cốt lõi: Conversation.lastSeq là counter cấp seq TRONG transaction (không dùng Redis INCR).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ConversationType {
+  department
+  project
+  common
+  direct
+  archived
+}
+
+enum MemberStatus {
+  active
+  removed
+}
+
+enum MemberRole {
+  owner
+  admin
+  member
+}
+
+enum MessageType {
+  text
+  image
+  file
+  voice
+  system
+}
+
+model User {
+  id        String   @id @default(uuid())
+  office1Id String?  @unique // id nhân sự bên 1Office
+  name      String
+  email     String?  @unique
+  createdAt DateTime @default(now())
+
+  members  ConversationMember[]
+  messages Message[]
+}
+
+model Conversation {
+  id        String           @id @default(uuid())
+  type      ConversationType
+  name      String?
+  avatarColor String?
+  office1Id String?          @unique // phòng ban 1Office (nếu là nhóm department)
+  lastSeq   BigInt           @default(0) // counter cấp seq — tăng trong transaction
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  members  ConversationMember[]
+  messages Message[]
+}
+
+model ConversationMember {
+  conversationId   String
+  userId           String
+  role             MemberRole   @default(member)
+  status           MemberStatus @default(active) // removed = soft-remove (tombstone)
+  lastReadSeq      BigInt       @default(0)       // "đã xem" = 1 con số / người / hội thoại
+  lastDeliveredSeq BigInt       @default(0)       // "đã nhận" (per-device sẽ tách sau)
+  removedAtSeq     BigInt? // seq lúc bị gỡ — sync trả tin tới đây rồi báo removed
+  joinedAt         DateTime     @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@id([conversationId, userId])
+  @@index([userId, status])
+}
+
+model Message {
+  id             String      @id @default(uuid())
+  conversationId String
+  senderId       String? // null = tin hệ thống
+  clientMsgId    String
+  seq            BigInt
+  type           MessageType @default(text)
+  content        String
+  replyToId      String?
+  createdAt      DateTime    @default(now())
+  editedAt       DateTime?
+  deletedAt      DateTime? // tombstone (thu hồi) — KHÔNG hard-delete để seq không lỗ
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User?        @relation(fields: [senderId], references: [id])
+
+  @@unique([conversationId, seq]) // seq gapless per conversation
+  @@unique([conversationId, clientMsgId]) // idempotency
+  @@index([conversationId, seq])
+}
