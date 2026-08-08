@@ -43,7 +43,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <button key={r} className={role === r ? 'on' : ''} onClick={() => setRole(r)}>{r}</button>
             ))}
           </div>
-          <div className="who"><span style={{ fontSize: 13, color: 'var(--muted)' }}>Nguyễn Văn An</span><div className="avatar">NA</div></div>
+          <div className="who">
+            <Link href="/toi" style={{ fontSize: 12, color: 'var(--indigo)', fontWeight: 600 }}>Bản nhân viên ›</Link>
+            <span style={{ fontSize: 13, color: 'var(--muted)' }}>Nguyễn Văn An</span>
+            <div className="avatar">NA</div>
+          </div>
         </header>
         <main className="hrm-content">{children}</main>
       </div>
