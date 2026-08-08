@@ -25,11 +25,11 @@ export function Sidebar() {
             <div key={sec}>
               <div className="sec-label">{sec}</div>
               {items.map((c) => {
-                const active = pathname === `/c/${c.id}`;
+                const active = pathname === `/chat/c/${c.id}`;
                 return (
                   <Link
                     key={c.id}
-                    href={`/c/${c.id}`}
+                    href={`/chat/c/${c.id}`}
                     className={`conv${active ? ' active' : ''}${c.archived ? ' muted' : ''}`}
                   >
                     <div className={`ava ${c.avaKind}${c.round ? ' round' : ''}`}>

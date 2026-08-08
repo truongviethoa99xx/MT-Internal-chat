@@ -10,7 +10,7 @@ export function ChatThread({ id }: { id: string }) {
     <section className="chat">
       <div className="chat-h">
         <div className="l">
-          <Link href="/" className="back">←</Link>
+          <Link href="/chat" className="back">←</Link>
           <div className={`ava ${conv.avaKind}`}>{conv.avatar}</div>
           <div>
             <div className="name">
