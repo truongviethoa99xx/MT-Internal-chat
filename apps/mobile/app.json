@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "MTM Chat",
+    "slug": "mtm-chat",
+    "scheme": "mtmchat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#4F46E5" } },
+    "plugins": ["expo-router"]
+  }
+}
